@@ -10,7 +10,10 @@ find_package(ament_cmake REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/HalInertialnavi.msg"
+  "msg/HalInertialnaviMsg.msg"
+  "msg/HalDvlMsg.msg"
+  "msg/HalDepthsensorMsg.msg"
+  "msg/HalBattery.msg"
 )
 
 ament_export_dependencies(rosidl_default_runtime)
