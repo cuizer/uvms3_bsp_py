@@ -14,6 +14,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/HalDvlMsg.msg"
   "msg/HalDepthsensorMsg.msg"
   "msg/HalBattery.msg"
+  "msg/HalAntenna.msg"
+  "msg/HalAntennaControl.msg"
 )
 
 ament_export_dependencies(rosidl_default_runtime)

@@ -5,6 +5,8 @@
 #include "uvms_msg_pkg/msg/hal_dvl_msg.hpp"
 #include "uvms_msg_pkg/msg/hal_depthsensor_msg.hpp"
 #include "uvms_msg_pkg/msg/hal_battery.hpp"
+#include "uvms_msg_pkg/msg/hal_antenna.hpp"
+#include "uvms_msg_pkg/msg/hal_antenna_control.hpp"
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -34,6 +36,9 @@ public:
         dvl_sub_          = this->create_subscription<uvms_msg_pkg::msg::HalDvlMsg>("/hal/dvl",qos,std::bind(&BspCommNode::dvl_callback, this, std::placeholders::_1));
         depthsensor_sub_  = this->create_subscription<uvms_msg_pkg::msg::HalDepthsensorMsg>("/hal/depthsensor",qos,std::bind(&BspCommNode::depthsensor_callback, this, std::placeholders::_1));
         battery_sub_      = this->create_subscription<uvms_msg_pkg::msg::HalBattery>("/hal/battery",qos,std::bind(&BspCommNode::battery_callback, this, std::placeholders::_1));
+        antenna_sub_      = this->create_subscription<uvms_msg_pkg::msg::HalAntenna>("/hal/antenna",qos,std::bind(&BspCommNode::antenna_callback, this, std::placeholders::_1));
+        
+        antenna_control_pub_ = this->create_publisher<uvms_msg_pkg::msg::HalAntennaControl>("/hal/antennacontrol",10);
  
         udp_ip_ = this->get_parameter("udp_ip").as_string();
         udp_port_ = this->get_parameter("udp_port").as_int();
@@ -73,6 +78,7 @@ public:
         dvl_sub_.reset();
         depthsensor_sub_.reset();
         battery_sub_.reset();
+        antenna_sub_.reset();
         timer_.reset();
 
         if (sock_ >= 0) {
@@ -108,6 +114,12 @@ private:
     {
         if (!active_) return;
         battery_data_ = *msg;
+    }
+    
+    void antenna_callback(const uvms_msg_pkg::msg::HalAntenna::SharedPtr msg)
+    {
+        if (!active_) return;
+        antenna_data_ = *msg;
     }
 
 // ================= 打包函数 =================
@@ -187,6 +199,20 @@ private:
         
         return buf;
     }
+    
+    std::vector<uint8_t> pack_antenna(const uvms_msg_pkg::msg::HalAntenna & msg)
+    {
+        std::vector<uint8_t> buf(sizeof(int64_t) + 2*sizeof(uint8_t) + sizeof(double));
+
+        uint8_t* p = buf.data();
+
+        memcpy(p, &msg.timestamp, sizeof(int64_t)); p += sizeof(int64_t);
+        memcpy(p, &msg.brake_status, sizeof(uint8_t)); p += sizeof(uint8_t);
+        memcpy(p, &msg.run_status, sizeof(uint8_t)); p += sizeof(uint8_t);
+        memcpy(p, &msg.total_angle, sizeof(double));
+
+        return buf;
+    }
 
 
 // ================= 打印函数 =================
@@ -263,6 +289,21 @@ private:
         msg.switch_state_12v,
         msg.switch_state_24v,
         msg.switch_state_72v
+    );
+    }
+    
+    void print_antenna(const uvms_msg_pkg::msg::HalAntenna & msg)
+    {
+    RCLCPP_INFO(this->get_logger(),
+        "[Antenna]\n"
+        "timestamp: %ld\n"
+        "brake_status: %u\n"
+        "run_status: %u\n"
+        "total_angle: %.3f deg",
+        msg.timestamp,
+        msg.brake_status,
+        msg.run_status,
+        msg.total_angle
     );
     }
     
@@ -351,6 +392,22 @@ private:
             sendto(sock_, packet.data(), packet.size(), 0, reinterpret_cast<struct sockaddr*>(&target_addr_), sizeof(target_addr_));
         }
         
+    // ---------- Antenna ----------
+        if (antenna_data_.has_value())
+        {
+            const auto & msg = antenna_data_.value();
+            if (do_print)
+            {
+                print_antenna(msg);
+            }
+
+            auto payload = pack_antenna(msg);
+            auto packet = build_packet(0x03, payload);
+            
+            sendto(sock_, packet.data(), packet.size(), 0, reinterpret_cast<struct sockaddr*>(&target_addr_), sizeof(target_addr_));
+        }
+        
+        
     }
 
 private:
@@ -358,12 +415,16 @@ private:
     rclcpp::Subscription<uvms_msg_pkg::msg::HalDvlMsg>::SharedPtr dvl_sub_;
     rclcpp::Subscription<uvms_msg_pkg::msg::HalDepthsensorMsg>::SharedPtr depthsensor_sub_;
     rclcpp::Subscription<uvms_msg_pkg::msg::HalBattery>::SharedPtr battery_sub_;
+    rclcpp::Subscription<uvms_msg_pkg::msg::HalAntenna>::SharedPtr antenna_sub_;
     rclcpp::TimerBase::SharedPtr timer_;
+    
+    rclcpp::Publisher<uvms_msg_pkg::msg::HalAntennaControl>::SharedPtr antenna_control_pub_;
 
     std::optional<uvms_msg_pkg::msg::HalInertialnaviMsg> inertial_data_;
     std::optional<uvms_msg_pkg::msg::HalDvlMsg> dvl_data_;
     std::optional<uvms_msg_pkg::msg::HalDepthsensorMsg> depthsensor_data_;
     std::optional<uvms_msg_pkg::msg::HalBattery> battery_data_;
+    std::optional<uvms_msg_pkg::msg::HalAntenna> antenna_data_;
 
     int sock_{-1};
     std::string udp_ip_;
