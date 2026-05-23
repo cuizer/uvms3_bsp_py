@@ -13,7 +13,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/HalInertialnaviMsg.msg"
   "msg/HalDvlMsg.msg"
   "msg/HalDepthsensorMsg.msg"
+  "msg/HalMainthruster.msg"
+  "msg/HalAuxithruster.msg"
   "msg/HalBattery.msg"
+  "msg/HalTailservo.msg"
   "msg/HalAntenna.msg"
   "msg/HalAntennaControl.msg"
 )
