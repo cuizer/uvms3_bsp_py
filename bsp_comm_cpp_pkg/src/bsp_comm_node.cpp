@@ -128,26 +128,26 @@ private:
         auxithruster_data_ = *msg;
     }
     
-    void battery_callback(const uvms_msg_pkg::msg::HalBattery::SharedPtr msg)
+    void battery_callback(const hal::msg::HalBattery::SharedPtr msg)
     {
         if (!active_) return;
         battery_data_ = *msg;
     }
     
-    void tailservo_callback(const uvms_msg_pkg::msg::HalTailservo::SharedPtr msg)
+    void tailservo_callback(const hal::msg::HalTailservo::SharedPtr msg)
     {
         if (!active_) return;
         tailservo_data_ = *msg;
     }
     
-    void antenna_callback(const uvms_msg_pkg::msg::HalAntenna::SharedPtr msg)
+    void antenna_callback(const hal::msg::HalAntenna::SharedPtr msg)
     {
         if (!active_) return;
         antenna_data_ = *msg;
     }
 
 // ================= 打包函数 =================
-    std::vector<uint8_t> pack_inertial(const uvms_msg_pkg::msg::HalInertialnaviMsg & msg)
+    std::vector<uint8_t> pack_inertial(const hal::msg::HalInertialnaviMsg & msg)
     {
         std::vector<uint8_t> buf(sizeof(int64_t) + 8*sizeof(float));
 
@@ -166,7 +166,7 @@ private:
         return buf;
     }
     
-    std::vector<uint8_t> pack_dvl(const uvms_msg_pkg::msg::HalDvlMsg & msg)
+    std::vector<uint8_t> pack_dvl(const hal::msg::HalDvlMsg & msg)
     {
         std::vector<uint8_t> buf(sizeof(int64_t) + 3*sizeof(float));
 
@@ -180,7 +180,7 @@ private:
         return buf;
     }
     
-    std::vector<uint8_t> pack_depthsensor(const uvms_msg_pkg::msg::HalDepthsensorMsg & msg)
+    std::vector<uint8_t> pack_depthsensor(const hal::msg::HalDepthsensorMsg & msg)
     {
         std::vector<uint8_t> buf(sizeof(int64_t) + 2*sizeof(float) + 2*sizeof(uint16_t) + sizeof(float));
 
@@ -196,7 +196,7 @@ private:
         return buf;
     }
     
-    std::vector<uint8_t> pack_mainthruster(const uvms_msg_pkg::msg::HalMainthruster & msg)
+    std::vector<uint8_t> pack_mainthruster(const hal::msg::HalMainthruster & msg)
     {
         std::vector<uint8_t> buf(sizeof(int64_t) + 3*sizeof(int16_t) + sizeof(uint8_t));
 
@@ -211,7 +211,7 @@ private:
         return buf;
     }
     
-    std::vector<uint8_t> pack_auxithruster(const uvms_msg_pkg::msg::HalAuxithruster & msg)
+    std::vector<uint8_t> pack_auxithruster(const hal::msg::HalAuxithruster & msg)
     {
         std::vector<uint8_t> buf(sizeof(int64_t) + 6 * sizeof(int16_t) + 6 * sizeof(int16_t) + 6 * sizeof(uint16_t) + 6 * sizeof(uint8_t) + 6 * sizeof(uint8_t));
 
@@ -238,7 +238,7 @@ private:
         return buf;
     }
     
-    std::vector<uint8_t> pack_battery(const uvms_msg_pkg::msg::HalBattery & msg)
+    std::vector<uint8_t> pack_battery(const hal::msg::HalBattery & msg)
     {
         std::vector<uint8_t> buf(sizeof(int64_t) + 2*sizeof(uint8_t) + 2*sizeof(uint16_t) + 2*sizeof(int16_t) + 2*sizeof(uint16_t) + 2*sizeof(uint16_t) + 2*sizeof(uint16_t) + 2*sizeof(uint16_t) + 3*sizeof(uint8_t));
 
@@ -266,7 +266,7 @@ private:
         return buf;
     }
     
-    std::vector<uint8_t> pack_tailservo(const uvms_msg_pkg::msg::HalTailservo & msg)
+    std::vector<uint8_t> pack_tailservo(const hal::msg::HalTailservo & msg)
     {
         std::vector<uint8_t> buf( sizeof(int64_t) + 4 * sizeof(float));
 
@@ -278,7 +278,7 @@ private:
         return buf;
     }
     
-    std::vector<uint8_t> pack_antenna(const uvms_msg_pkg::msg::HalAntenna & msg)
+    std::vector<uint8_t> pack_antenna(const hal::msg::HalAntenna & msg)
     {
         std::vector<uint8_t> buf(sizeof(int64_t) + 2*sizeof(uint8_t) + sizeof(double));
 
@@ -294,7 +294,7 @@ private:
 
 
 // ================= 打印函数 =================
-    void print_inertial(const uvms_msg_pkg::msg::HalInertialnaviMsg & msg)
+    void print_inertial(const hal::msg::HalInertialnaviMsg & msg)
     {
     RCLCPP_INFO(this->get_logger(), "[Inertial]\n""timestamp: %ld | yaw: %.2f | pitch: %.2f | roll: %.2f\n""latitude: %.2f | longitude: %.2f\n""east_velocity: %.2f | north_velocity: %.2f | sky_velocity: %.2f",
         msg.timestamp,
@@ -309,7 +309,7 @@ private:
     );
     }
     
-    void print_dvl(const uvms_msg_pkg::msg::HalDvlMsg & msg)
+    void print_dvl(const hal::msg::HalDvlMsg & msg)
     {
     RCLCPP_INFO(this->get_logger(), "[Dvl]\n""timestamp: %ld | velocity_x: %.2f | velocity_y: %.2f | velocity_z: %.2f",
         msg.timestamp,
@@ -319,7 +319,7 @@ private:
     );
     }
     
-    void print_depthsensor(const uvms_msg_pkg::msg::HalDepthsensorMsg & msg)
+    void print_depthsensor(const hal::msg::HalDepthsensorMsg & msg)
     {
     RCLCPP_INFO(this->get_logger(), 
         "[Depthsensor]\n"
@@ -336,7 +336,7 @@ private:
     );
     }
     
-    void print_mainthruster(const uvms_msg_pkg::msg::HalMainthruster & msg)
+    void print_mainthruster(const hal::msg::HalMainthruster & msg)
     {
     RCLCPP_INFO(this->get_logger(),
         "[MainThruster]\n"
@@ -353,7 +353,7 @@ private:
     );
     }
     
-    void print_auxithruster(const uvms_msg_pkg::msg::HalAuxithruster & msg)
+    void print_auxithruster(const hal::msg::HalAuxithruster & msg)
     {
     RCLCPP_INFO(this->get_logger(),"timestamp: %ld", msg.timestamp);
 
@@ -363,7 +363,7 @@ private:
     }
     }
     
-    void print_battery(const uvms_msg_pkg::msg::HalBattery & msg)
+    void print_battery(const hal::msg::HalBattery & msg)
     {
     RCLCPP_INFO(this->get_logger(),
         "[Battery]\n"
@@ -397,7 +397,7 @@ private:
     );
     }
     
-    void print_tailservo(const uvms_msg_pkg::msg::HalTailservo & msg)
+    void print_tailservo(const hal::msg::HalTailservo & msg)
     {
     RCLCPP_INFO(this->get_logger(), "[TailServo] timestamp: %ld", msg.timestamp);
 
@@ -407,7 +407,7 @@ private:
     }
     }
     
-    void print_antenna(const uvms_msg_pkg::msg::HalAntenna & msg)
+    void print_antenna(const hal::msg::HalAntenna & msg)
     {
     RCLCPP_INFO(this->get_logger(),
         "[Antenna]\n"
@@ -571,26 +571,24 @@ private:
     }
 
 private:
-    rclcpp::Subscription<uvms_msg_pkg::msg::HalInertialnaviMsg>::SharedPtr inertial_sub_;
-    rclcpp::Subscription<uvms_msg_pkg::msg::HalDvlMsg>::SharedPtr dvl_sub_;
-    rclcpp::Subscription<uvms_msg_pkg::msg::HalDepthsensorMsg>::SharedPtr depthsensor_sub_;
-    rclcpp::Subscription<uvms_msg_pkg::msg::HalMainthruster>::SharedPtr mainthruster_sub_;
-    rclcpp::Subscription<uvms_msg_pkg::msg::HalAuxithruster>::SharedPtr auxithruster_sub_;
-    rclcpp::Subscription<uvms_msg_pkg::msg::HalBattery>::SharedPtr battery_sub_;
-    rclcpp::Subscription<uvms_msg_pkg::msg::HalTailservo>::SharedPtr tailservo_sub_;
-    rclcpp::Subscription<uvms_msg_pkg::msg::HalAntenna>::SharedPtr antenna_sub_;
+    rclcpp::Subscription<hal::msg::HalInertialnaviMsg>::SharedPtr inertial_sub_;
+    rclcpp::Subscription<hal::msg::HalDvlMsg>::SharedPtr dvl_sub_;
+    rclcpp::Subscription<hal::msg::HalDepthsensorMsg>::SharedPtr depthsensor_sub_;
+    rclcpp::Subscription<hal::msg::HalMainthruster>::SharedPtr mainthruster_sub_;
+    rclcpp::Subscription<hal::msg::HalAuxithruster>::SharedPtr auxithruster_sub_;
+    rclcpp::Subscription<hal::msg::HalBattery>::SharedPtr battery_sub_;
+    rclcpp::Subscription<hal::msg::HalTailservo>::SharedPtr tailservo_sub_;
+    rclcpp::Subscription<hal::msg::HalAntenna>::SharedPtr antenna_sub_;
     rclcpp::TimerBase::SharedPtr timer_;
-    
-    rclcpp::Publisher<uvms_msg_pkg::msg::HalAntennaControl>::SharedPtr antenna_control_pub_;
 
-    std::optional<uvms_msg_pkg::msg::HalInertialnaviMsg> inertial_data_;
-    std::optional<uvms_msg_pkg::msg::HalDvlMsg> dvl_data_;
-    std::optional<uvms_msg_pkg::msg::HalDepthsensorMsg> depthsensor_data_;
-    std::optional<uvms_msg_pkg::msg::HalMainthruster> mainthruster_data_;
-    std::optional<uvms_msg_pkg::msg::HalAuxithruster> auxithruster_data_;
-    std::optional<uvms_msg_pkg::msg::HalBattery> battery_data_;
-    std::optional<uvms_msg_pkg::msg::HalTailservo> tailservo_data_;
-    std::optional<uvms_msg_pkg::msg::HalAntenna> antenna_data_;
+    std::optional<hal::msg::HalInertialnaviMsg> inertial_data_;
+    std::optional<hal::msg::HalDvlMsg> dvl_data_;
+    std::optional<hal::msg::HalDepthsensorMsg> depthsensor_data_;
+    std::optional<hal::msg::HalMainthruster> mainthruster_data_;
+    std::optional<hal::msg::HalAuxithruster> auxithruster_data_;
+    std::optional<hal::msg::HalBattery> battery_data_;
+    std::optional<hal::msg::HalTailservo> tailservo_data_;
+    std::optional<hal::msg::HalAntenna> antenna_data_;
 
     int sock_{-1};
     std::string udp_ip_;
