@@ -1,15 +1,14 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 
-#include "uvms_msg_pkg/msg/hal_inertialnavi_msg.hpp"
-#include "uvms_msg_pkg/msg/hal_dvl_msg.hpp"
-#include "uvms_msg_pkg/msg/hal_depthsensor_msg.hpp"
-#include "uvms_msg_pkg/msg/hal_mainthruster.hpp"
-#include "uvms_msg_pkg/msg/hal_auxithruster.hpp"
-#include "uvms_msg_pkg/msg/hal_battery.hpp"
-#include "uvms_msg_pkg/msg/hal_tailservo.hpp"
-#include "uvms_msg_pkg/msg/hal_antenna.hpp"
-#include "uvms_msg_pkg/msg/hal_antenna_control.hpp"
+#include "hal/msg/hal_inertialnavi_msg.hpp"
+#include "hal/msg/hal_dvl_msg.hpp"
+#include "hal/msg/hal_depthsensor_msg.hpp"
+#include "hal/msg/hal_mainthruster.hpp"
+#include "hal/msg/hal_auxithruster.hpp"
+#include "hal/msg/hal_battery.hpp"
+#include "hal/msg/hal_tailservo.hpp"
+#include "hal/msg/hal_antenna.hpp"
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -35,16 +34,14 @@ public:
         auto qos = rclcpp::QoS(10);
 
         // 创建HAL节点消息订阅
-        inertial_sub_     = this->create_subscription<uvms_msg_pkg::msg::HalInertialnaviMsg>("/hal/inertialnavi",qos,std::bind(&BspCommNode::inertial_callback, this, std::placeholders::_1));
-        dvl_sub_          = this->create_subscription<uvms_msg_pkg::msg::HalDvlMsg>("/hal/dvl",qos,std::bind(&BspCommNode::dvl_callback, this, std::placeholders::_1));
-        depthsensor_sub_  = this->create_subscription<uvms_msg_pkg::msg::HalDepthsensorMsg>("/hal/depthsensor",qos,std::bind(&BspCommNode::depthsensor_callback, this, std::placeholders::_1));
-        mainthruster_sub_ = this->create_subscription<uvms_msg_pkg::msg::HalMainthruster>("/hal/mainthruster",qos,std::bind(&BspCommNode::mainthruster_callback, this, std::placeholders::_1));
-        auxithruster_sub_ = this->create_subscription<uvms_msg_pkg::msg::HalAuxithruster>("/hal/auxithruster",qos,std::bind(&BspCommNode::auxithruster_callback, this, std::placeholders::_1));
-        battery_sub_      = this->create_subscription<uvms_msg_pkg::msg::HalBattery>("/hal/battery",qos,std::bind(&BspCommNode::battery_callback, this, std::placeholders::_1));
-        tailservo_sub_    = this->create_subscription<uvms_msg_pkg::msg::HalTailservo>("/hal/tailservo",qos,std::bind(&BspCommNode::tailservo_callback, this, std::placeholders::_1));
-        antenna_sub_      = this->create_subscription<uvms_msg_pkg::msg::HalAntenna>("/hal/antenna",qos,std::bind(&BspCommNode::antenna_callback, this, std::placeholders::_1));
-        
-        antenna_control_pub_ = this->create_publisher<uvms_msg_pkg::msg::HalAntennaControl>("/hal/antennacontrol",10);
+        inertial_sub_     = this->create_subscription<hal::msg::HalInertialnaviMsg>("/hal/inertialnavi",qos,std::bind(&BspCommNode::inertial_callback, this, std::placeholders::_1));
+        dvl_sub_          = this->create_subscription<hal::msg::HalDvlMsg>("/hal/dvl",qos,std::bind(&BspCommNode::dvl_callback, this, std::placeholders::_1));
+        depthsensor_sub_  = this->create_subscription<hal::msg::HalDepthsensorMsg>("/hal/depthsensor",qos,std::bind(&BspCommNode::depthsensor_callback, this, std::placeholders::_1));
+        mainthruster_sub_ = this->create_subscription<hal::msg::HalMainthruster>("/hal/mainthruster",qos,std::bind(&BspCommNode::mainthruster_callback, this, std::placeholders::_1));
+        auxithruster_sub_ = this->create_subscription<hal::msg::HalAuxithruster>("/hal/auxithruster",qos,std::bind(&BspCommNode::auxithruster_callback, this, std::placeholders::_1));
+        battery_sub_      = this->create_subscription<hal::msg::HalBattery>("/hal/battery",qos,std::bind(&BspCommNode::battery_callback, this, std::placeholders::_1));
+        tailservo_sub_    = this->create_subscription<hal::msg::HalTailservo>("/hal/tailservo",qos,std::bind(&BspCommNode::tailservo_callback, this, std::placeholders::_1));
+        antenna_sub_      = this->create_subscription<hal::msg::HalAntenna>("/hal/antenna",qos,std::bind(&BspCommNode::antenna_callback, this, std::placeholders::_1));
  
         udp_ip_ = this->get_parameter("udp_ip").as_string();
         udp_port_ = this->get_parameter("udp_port").as_int();
@@ -101,31 +98,31 @@ public:
 private:
 
     // ================= 回调函数 =================
-    void inertial_callback(const uvms_msg_pkg::msg::HalInertialnaviMsg::SharedPtr msg)
+    void inertial_callback(const hal::msg::HalInertialnaviMsg::SharedPtr msg)
     {
         if (!active_) return;
         inertial_data_ = *msg;
     }
     
-    void dvl_callback(const uvms_msg_pkg::msg::HalDvlMsg::SharedPtr msg)
+    void dvl_callback(const hal::msg::HalDvlMsg::SharedPtr msg)
     {
         if (!active_) return;
         dvl_data_ = *msg;
     }
     
-    void depthsensor_callback(const uvms_msg_pkg::msg::HalDepthsensorMsg::SharedPtr msg)
+    void depthsensor_callback(const hal::msg::HalDepthsensorMsg::SharedPtr msg)
     {
         if (!active_) return;
         depthsensor_data_ = *msg;
     }
     
-    void mainthruster_callback(const uvms_msg_pkg::msg::HalMainthruster::SharedPtr msg)
+    void mainthruster_callback(const hal::msg::HalMainthruster::SharedPtr msg)
     {
         if (!active_) return;
         mainthruster_data_ = *msg;
     }
     
-    void auxithruster_callback(const uvms_msg_pkg::msg::HalAuxithruster::SharedPtr msg)
+    void auxithruster_callback(const hal::msg::HalAuxithruster::SharedPtr msg)
     {
         if (!active_) return;
         auxithruster_data_ = *msg;
