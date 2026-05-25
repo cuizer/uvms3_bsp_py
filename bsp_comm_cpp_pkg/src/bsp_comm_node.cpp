@@ -1,9 +1,9 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 
-#include "hal/msg/hal_inertialnavi_msg.hpp"
-#include "hal/msg/hal_dvl_msg.hpp"
-#include "hal/msg/hal_depthsensor_msg.hpp"
+#include "hal/msg/hal_inertialnavi.hpp"
+#include "hal/msg/hal_dvl.hpp"
+#include "hal/msg/hal_depthsensor.hpp"
 #include "hal/msg/hal_mainthruster.hpp"
 #include "hal/msg/hal_auxithruster.hpp"
 #include "hal/msg/hal_battery.hpp"
@@ -34,9 +34,9 @@ public:
         auto qos = rclcpp::QoS(10);
 
         // 创建HAL节点消息订阅
-        inertial_sub_     = this->create_subscription<hal::msg::HalInertialnaviMsg>("/hal/inertialnavi",qos,std::bind(&BspCommNode::inertial_callback, this, std::placeholders::_1));
-        dvl_sub_          = this->create_subscription<hal::msg::HalDvlMsg>("/hal/dvl",qos,std::bind(&BspCommNode::dvl_callback, this, std::placeholders::_1));
-        depthsensor_sub_  = this->create_subscription<hal::msg::HalDepthsensorMsg>("/hal/depthsensor",qos,std::bind(&BspCommNode::depthsensor_callback, this, std::placeholders::_1));
+        inertial_sub_     = this->create_subscription<hal::msg::HalInertialnavi>("/hal/inertialnavi",qos,std::bind(&BspCommNode::inertial_callback, this, std::placeholders::_1));
+        dvl_sub_          = this->create_subscription<hal::msg::HalDvl>("/hal/dvl",qos,std::bind(&BspCommNode::dvl_callback, this, std::placeholders::_1));
+        depthsensor_sub_  = this->create_subscription<hal::msg::HalDepthsensor>("/hal/depthsensor",qos,std::bind(&BspCommNode::depthsensor_callback, this, std::placeholders::_1));
         mainthruster_sub_ = this->create_subscription<hal::msg::HalMainthruster>("/hal/mainthruster",qos,std::bind(&BspCommNode::mainthruster_callback, this, std::placeholders::_1));
         auxithruster_sub_ = this->create_subscription<hal::msg::HalAuxithruster>("/hal/auxithruster",qos,std::bind(&BspCommNode::auxithruster_callback, this, std::placeholders::_1));
         battery_sub_      = this->create_subscription<hal::msg::HalBattery>("/hal/battery",qos,std::bind(&BspCommNode::battery_callback, this, std::placeholders::_1));
@@ -98,19 +98,19 @@ public:
 private:
 
     // ================= 回调函数 =================
-    void inertial_callback(const hal::msg::HalInertialnaviMsg::SharedPtr msg)
+    void inertial_callback(const hal::msg::HalInertialnavi::SharedPtr msg)
     {
         if (!active_) return;
         inertial_data_ = *msg;
     }
     
-    void dvl_callback(const hal::msg::HalDvlMsg::SharedPtr msg)
+    void dvl_callback(const hal::msg::HalDvl::SharedPtr msg)
     {
         if (!active_) return;
         dvl_data_ = *msg;
     }
     
-    void depthsensor_callback(const hal::msg::HalDepthsensorMsg::SharedPtr msg)
+    void depthsensor_callback(const hal::msg::HalDepthsensor::SharedPtr msg)
     {
         if (!active_) return;
         depthsensor_data_ = *msg;
@@ -147,7 +147,7 @@ private:
     }
 
 // ================= 打包函数 =================
-    std::vector<uint8_t> pack_inertial(const hal::msg::HalInertialnaviMsg & msg)
+    std::vector<uint8_t> pack_inertial(const hal::msg::HalInertialnavi & msg)
     {
         std::vector<uint8_t> buf(sizeof(int64_t) + 8*sizeof(float));
 
@@ -166,7 +166,7 @@ private:
         return buf;
     }
     
-    std::vector<uint8_t> pack_dvl(const hal::msg::HalDvlMsg & msg)
+    std::vector<uint8_t> pack_dvl(const hal::msg::HalDvl & msg)
     {
         std::vector<uint8_t> buf(sizeof(int64_t) + 3*sizeof(float));
 
@@ -180,7 +180,7 @@ private:
         return buf;
     }
     
-    std::vector<uint8_t> pack_depthsensor(const hal::msg::HalDepthsensorMsg & msg)
+    std::vector<uint8_t> pack_depthsensor(const hal::msg::HalDepthsensor & msg)
     {
         std::vector<uint8_t> buf(sizeof(int64_t) + 2*sizeof(float) + 2*sizeof(uint16_t) + sizeof(float));
 
@@ -286,7 +286,7 @@ private:
 
         memcpy(p, &msg.timestamp, sizeof(int64_t)); p += sizeof(int64_t);
         memcpy(p, &msg.brake_status, sizeof(uint8_t)); p += sizeof(uint8_t);
-        memcpy(p, &msg.run_status, sizeof(uint8_t)); p += sizeof(uint8_t);
+        memcpy(p, &msg.running_status, sizeof(uint8_t)); p += sizeof(uint8_t);
         memcpy(p, &msg.total_angle, sizeof(double));
 
         return buf;
@@ -294,7 +294,7 @@ private:
 
 
 // ================= 打印函数 =================
-    void print_inertial(const hal::msg::HalInertialnaviMsg & msg)
+    void print_inertial(const hal::msg::HalInertialnavi & msg)
     {
     RCLCPP_INFO(this->get_logger(), "[Inertial]\n""timestamp: %ld | yaw: %.2f | pitch: %.2f | roll: %.2f\n""latitude: %.2f | longitude: %.2f\n""east_velocity: %.2f | north_velocity: %.2f | sky_velocity: %.2f",
         msg.timestamp,
@@ -309,7 +309,7 @@ private:
     );
     }
     
-    void print_dvl(const hal::msg::HalDvlMsg & msg)
+    void print_dvl(const hal::msg::HalDvl & msg)
     {
     RCLCPP_INFO(this->get_logger(), "[Dvl]\n""timestamp: %ld | velocity_x: %.2f | velocity_y: %.2f | velocity_z: %.2f",
         msg.timestamp,
@@ -319,7 +319,7 @@ private:
     );
     }
     
-    void print_depthsensor(const hal::msg::HalDepthsensorMsg & msg)
+    void print_depthsensor(const hal::msg::HalDepthsensor & msg)
     {
     RCLCPP_INFO(this->get_logger(), 
         "[Depthsensor]\n"
@@ -417,7 +417,7 @@ private:
         "total_angle: %.3f deg",
         msg.timestamp,
         msg.brake_status,
-        msg.run_status,
+        msg.running_status,
         msg.total_angle
     );
     }
@@ -571,9 +571,9 @@ private:
     }
 
 private:
-    rclcpp::Subscription<hal::msg::HalInertialnaviMsg>::SharedPtr inertial_sub_;
-    rclcpp::Subscription<hal::msg::HalDvlMsg>::SharedPtr dvl_sub_;
-    rclcpp::Subscription<hal::msg::HalDepthsensorMsg>::SharedPtr depthsensor_sub_;
+    rclcpp::Subscription<hal::msg::HalInertialnavi>::SharedPtr inertial_sub_;
+    rclcpp::Subscription<hal::msg::HalDvl>::SharedPtr dvl_sub_;
+    rclcpp::Subscription<hal::msg::HalDepthsensor>::SharedPtr depthsensor_sub_;
     rclcpp::Subscription<hal::msg::HalMainthruster>::SharedPtr mainthruster_sub_;
     rclcpp::Subscription<hal::msg::HalAuxithruster>::SharedPtr auxithruster_sub_;
     rclcpp::Subscription<hal::msg::HalBattery>::SharedPtr battery_sub_;
@@ -581,9 +581,9 @@ private:
     rclcpp::Subscription<hal::msg::HalAntenna>::SharedPtr antenna_sub_;
     rclcpp::TimerBase::SharedPtr timer_;
 
-    std::optional<hal::msg::HalInertialnaviMsg> inertial_data_;
-    std::optional<hal::msg::HalDvlMsg> dvl_data_;
-    std::optional<hal::msg::HalDepthsensorMsg> depthsensor_data_;
+    std::optional<hal::msg::HalInertialnavi> inertial_data_;
+    std::optional<hal::msg::HalDvl> dvl_data_;
+    std::optional<hal::msg::HalDepthsensor> depthsensor_data_;
     std::optional<hal::msg::HalMainthruster> mainthruster_data_;
     std::optional<hal::msg::HalAuxithruster> auxithruster_data_;
     std::optional<hal::msg::HalBattery> battery_data_;
