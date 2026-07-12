@@ -8,7 +8,12 @@ package_name = 'bsp'
 setup(
     name=package_name,
     version='0.0.1',
-    py_modules=['teleop_receiver'],
+    py_modules=[
+        'teleop_receiver',
+        'bsp_motioncontrol_node',
+        'dof_controller',
+        'thrust_alloc',
+    ],
     package_dir={'': 'src'},
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -17,6 +22,10 @@ setup(
         (
             os.path.join('share', package_name, 'launch'),
             glob('launch/*.launch.py'),
+        ),
+        (
+            os.path.join('share', package_name, 'config'),
+            glob('config/*.yaml'),
         ),
     ],
     install_requires=['setuptools'],
@@ -29,6 +38,7 @@ setup(
     entry_points={
         'console_scripts': [
             'teleop_receiver = teleop_receiver:main',
+            'bsp_motioncontrol_node = bsp_motioncontrol_node:main',
         ],
     },
 )

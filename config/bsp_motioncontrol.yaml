@@ -1,0 +1,125 @@
+# =============================================================================
+# bsp_motioncontrol_node 参数配置
+# =============================================================================
+# 控制律: τ = τ_FF + τ_PID - d̂  (逐自由度解耦)
+#
+# 调参建议:
+#   - 先关闭 DOB (dob_bandwidth=0), 调好 PID+FF 使各轴稳定
+#   - 再逐步开 DOB, 从小带宽开始 (0.5~2.0), 观察扰动抑制效果
+#   - depth 通道不设前馈 (ff_linear/quadratic=0), 深度保持靠 PID
+# =============================================================================
+
+bsp_motioncontrol_node:
+  ros__parameters:
+
+    # ---- 运行参数 ----
+    control_rate_hz: 50.0
+    cmd_timeout_s: 1.0
+    controller_mode: 3             # 1=纯PID  2=FF+PID  3=FF+PID+DOB
+
+    # ---- 执行器参数 ----
+    deadzone_pct: 3.0
+
+    # ---- 通道使能 ----
+    enable_surge: true
+    enable_sway: true
+    enable_depth: true
+    enable_yaw: true
+    enable_pitch: true
+    enable_roll: true
+
+    # =========================================================================
+    # 逐自由度控制器参数
+    # =========================================================================
+
+    # -- Surge (纵荡, X 轴前进) --
+    surge.kp: 200.0
+    surge.ki: 20.0
+    surge.kd: 10.0
+    surge.max_i: 50.0
+    surge.max_out: 300.0
+    surge.ff_linear: 50.0
+    surge.ff_quadratic: 120.0
+    surge.dob_bandwidth: 3.0
+    surge.mass_eff: 275.0
+    surge.damp_eff: 50.0
+
+    # -- Sway (横荡, Y 轴侧移) --
+    sway.kp: 200.0
+    sway.ki: 20.0
+    sway.kd: 10.0
+    sway.max_i: 50.0
+    sway.max_out: 300.0
+    sway.ff_linear: 60.0
+    sway.ff_quadratic: 140.0
+    sway.dob_bandwidth: 3.0
+    sway.mass_eff: 526.8
+    sway.damp_eff: 125.0
+
+    # -- Depth (垂荡, Z 轴深度) --
+    depth.kp: 300.0
+    depth.ki: 30.0
+    depth.kd: 50.0
+    depth.max_i: 80.0
+    depth.max_out: 400.0
+    depth.ff_linear: 0.0
+    depth.ff_quadratic: 0.0
+    depth.dob_bandwidth: 2.0
+    depth.mass_eff: 526.8
+    depth.damp_eff: 125.0
+    depth.buoyancy_trim: 0.0
+
+    # -- Yaw (艏向) --
+    yaw.kp: 400.0
+    yaw.ki: 10.0
+    yaw.kd: 80.0
+    yaw.max_i: 40.0
+    yaw.max_out: 500.0
+    yaw.ff_linear: 30.0
+    yaw.ff_quadratic: 80.0
+    yaw.dob_bandwidth: 2.0
+    yaw.mass_eff: 472.9
+    yaw.damp_eff: 47.2
+
+    # -- Pitch (纵倾, 锁定为 0) --
+    pitch.kp: 150.0
+    pitch.ki: 5.0
+    pitch.kd: 30.0
+    pitch.max_i: 20.0
+    pitch.max_out: 150.0
+    pitch.ff_linear: 0.0
+    pitch.ff_quadratic: 0.0
+    pitch.dob_bandwidth: 1.5
+    pitch.mass_eff: 472.0
+    pitch.damp_eff: 47.2
+
+    # -- Roll (横摇, 锁定为 0) --
+    roll.kp: 150.0
+    roll.ki: 5.0
+    roll.kd: 30.0
+    roll.max_i: 20.0
+    roll.max_out: 150.0
+    roll.ff_linear: 0.0
+    roll.ff_quadratic: 0.0
+    roll.dob_bandwidth: 1.5
+    roll.mass_eff: 4.345
+    roll.damp_eff: 0.434
+
+    # =========================================================================
+    # 推力分配矩阵 (6×6, 行优先 36 元素)
+    #
+    # 列顺序: [Main, Aux0, Aux1, Aux2, Aux3, Aux4]
+    # 行顺序: [Fx, Fy, Fz, Mx, My, Mz]
+    # τ = T @ u
+    # =========================================================================
+    alloc_matrix: [
+      1.0, 0.0, 0.0, 0.0, 0.5, 0.5,
+      0.0, 0.0, 0.0, 1.0, 1.0, 0.0,
+      0.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+      0.0, 0.1,-0.1, 0.0, 0.0, 0.0,
+      0.0, 0.3, 0.3, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.2,-0.2, 0.1
+    ]
+
+    # ---- 各推进器推力上限 (N) ----
+    thrust_limits: [441.0, 69.0, 69.0, 69.0, 69.0, 69.0]
