@@ -1,0 +1,1 @@
+uint8 thrustercontrol_cmd

@@ -1,2 +1,0 @@
-uint8 run_status
-float32 position_coeff
